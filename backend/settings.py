@@ -42,8 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "rest_framework",
     'corsheaders',
-    'user_management',
-    'quiz',
+    'users',
+   
     'rest_framework_simplejwt.token_blacklist'
 ]
 
@@ -81,7 +81,7 @@ MIDDLEWARE = [
 
 
 
-ROOT_URLCONF = 'quiz_backend.urls'
+ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
@@ -98,7 +98,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'quiz_backend.wsgi.application'
+WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 # Database
@@ -161,7 +161,7 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'user_management.Users'
+AUTH_USER_MODEL = 'users.Users'
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIALS = True
