@@ -10,6 +10,9 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("Users must have a username")
 
         email = self.normalize_email(email)
+
+        extra_fields.setdefault('role', 'user')
+
         user = self.model(
             email=email,
             username=username,
@@ -25,25 +28,40 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_staff', True)
 
-        user = self.create_user(
+        
+        extra_fields.setdefault('role', 'admin')
+
+        if password is None:
+            raise ValueError("Superusers must have a password")
+
+        return self.create_user(
             email=email,
             username=username,
             phone=phone,
             password=password,
             **extra_fields
         )
-        return user
 
 
 class Users(AbstractBaseUser, PermissionsMixin):
+    ROLE_CHOICES = (
+        ('user', 'User'),
+        ('admin', 'Admin'),
+        ('staff', 'Staff'),
+    )
+
     email = models.EmailField(max_length=100, unique=True)
     username = models.CharField(max_length=50, unique=True)
-    phone = models.CharField(max_length=15, unique=True, null=True, blank=True)    
+    phone = models.CharField(max_length=15, unique=True, null=True, blank=True)
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+
     is_email_verified = models.BooleanField(default=False)
     email_otp = models.CharField(max_length=6, null=True, blank=True)
+
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
 
     objects = CustomUserManager()
 
@@ -57,4 +75,4 @@ class Users(AbstractBaseUser, PermissionsMixin):
         return self.is_superuser
 
     def has_module_perms(self, app_label):
-        return True 
+        return True
