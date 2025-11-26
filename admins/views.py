@@ -96,7 +96,7 @@ class AdminUserViewSet(ModelViewSet):
         return Users.objects.filter(is_email_verified = True, role="user")
 
     
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], url_path='block')
     def block(self, request, pk=None):
         user = Users.objects.filter(pk=pk).first()
         if not user:
@@ -107,7 +107,7 @@ class AdminUserViewSet(ModelViewSet):
         return Response({"msg": "User blocked successfully"}, status=status.HTTP_200_OK)
 
 
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], url_path='unblock')
     def unblock(self, request, pk=None):
         user = Users.objects.filter(pk=pk).first()
         if not user:
@@ -163,29 +163,28 @@ class AdminStaffViewSet(
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
     
-    @action(detail=True, methods=["post"])
-    def active(self, request, pk=None):
-        staff = Users.objects.filter(pk=pk, role="staff").first()
-        if not staff:
-            return Response({"detail": "Staff not found"}, status=status.HTTP_404_NOT_FOUND)
-
+    @action(detail=True, methods=["post"], url_path="block")
+    def block(self, request, pk=None):
+        staff = self.get_object()
         staff.is_active = False
         staff.save()
-        return Response({"msg": "Staff Activated successfully"}, status=status.HTTP_200_OK)
+        return Response({"msg": "Staff blocked successfully"}, status=status.HTTP_200_OK)
 
-    
-    @action(detail=True, methods=["post"])
-    def deactivate(self, request, pk=None):
-        staff = Users.objects.filter(pk=pk, role="staff").first()
-        if not staff:
-            return Response({"detail": "Staff not found"}, status=status.HTTP_404_NOT_FOUND)
-
+    @action(detail=True, methods=["post"], url_path="unblock")
+    def unblock(self, request, pk=None):
+        staff = self.get_object()
         staff.is_active = True
         staff.save()
-        return Response({"msg": "Staff Deactivated successfully"}, status=status.HTTP_200_OK)
-    
-    
-    
+        return Response({"msg": "Staff unblocked successfully"}, status=status.HTTP_200_OK)
+class AdminGetView(APIView):
+    permission_classes = [IsAdminUser]
+    def get(self, request, pk):
+        try:
+            user = Users.objects.get(pk=pk)
+        except Users.DoesNotExist:
+            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK) 
     
     
     
