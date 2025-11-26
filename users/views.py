@@ -13,6 +13,11 @@ import random
 from django.contrib.auth.hashers import make_password
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework.viewsets import ModelViewSet
+
+from rest_framework.permissions import IsAdminUser
+
+from rest_framework.decorators import action
 
 
 
@@ -125,7 +130,7 @@ class VerifyOTPView(APIView):
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         
         
-class LoginView(APIView):
+class UserLoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -175,67 +180,6 @@ class UserLogoutView(APIView):
         try:
             token = RefreshToken(refresh_token)
             token.blacklist()
-        except TokenError:
-            return Response(
-                {"detail": "Invalid refresh token"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        return Response(
-            {"detail": "Logout successful"},
-            status=status.HTTP_205_RESET_CONTENT
-        )
-
-class AdminLoginView(APIView):
-    def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-
-        try:
-            user = Users.objects.get(email=email)
-        except Users.DoesNotExist:
-           
-            return Response(
-                {'detail': 'Invalid credentials or not an admin'},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-
-        
-
-        if user.check_password(password) and user.is_superuser:
-           
-            refresh = RefreshToken.for_user(user)
-            
-            return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'is_superuser': user.is_superuser,
-                'email': user.email,
-            })
-
-        return Response(
-            {'detail': 'Invalid credentials or not an admin'},
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-    
-
-
-
-class AdminLogoutView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        refresh_token = request.data.get("refresh")
-
-        if refresh_token is None:
-            return Response(
-                {"detail": "Refresh token is required"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            token = RefreshToken(refresh_token)
-            token.blacklist()   
         except TokenError:
             return Response(
                 {"detail": "Invalid refresh token"},
