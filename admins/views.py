@@ -48,6 +48,8 @@ class AdminLoginView(APIView):
                 'access': str(refresh.access_token),
                 'is_superuser': user.is_superuser,
                 'email': user.email,
+                'user': user.id,
+                
             })
 
         return Response(
