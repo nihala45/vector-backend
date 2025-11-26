@@ -94,3 +94,5 @@ virtualenvwrapper-win
 webencodings
 xhtml2pdf
 yarl
+dj-database-url
+psycopg[binary]
