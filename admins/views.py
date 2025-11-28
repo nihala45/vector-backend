@@ -176,6 +176,7 @@ class AdminStaffViewSet(
         staff.is_active = True
         staff.save()
         return Response({"msg": "Staff unblocked successfully"}, status=status.HTTP_200_OK)
+            
 class AdminGetView(APIView):
     permission_classes = [IsAdminUser]
     def get(self, request, pk):
