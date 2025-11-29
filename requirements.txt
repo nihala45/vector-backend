@@ -95,4 +95,4 @@ webencodings
 xhtml2pdf
 yarl
 dj-database-url
-psycopg[binary]
+psycopg[binary]python manage.py migrate

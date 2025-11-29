@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView
-from .serializer import CourseSerializer
-from .models import Course
+from .serializer import CourseSerializer, ModuleSerializer, TopicSerializer, VideoSerializer, DocumentSerializer
+from .models import Course, Module, Topic, Video, Document
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
@@ -65,3 +65,42 @@ class RemoveStaffFromCourse(APIView):
             'staff_removed': [staff.id for staff in staff_members]
             }, status=200)
 
+class ModuleCreateAndListView(ListCreateAPIView):
+    queryset = Module.objects.all()
+    serializer_class = ModuleSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    
+class ModuleCRUDView(RetrieveUpdateDestroyAPIView):
+    queryset = Module.objects.all()
+    serializer_class = ModuleSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    
+class TopicCreateAndListView(ListCreateAPIView):
+    queryset = Topic.objects.all()
+    serializer_class = TopicSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+class TopicCRUDView(RetrieveUpdateDestroyAPIView):
+    queryset = Topic.objects.all()
+    serializer_class = TopicSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    
+class VideoCreateAndListView(ListCreateAPIView):
+    queryset = Video.objects.all()
+    serializer_class = VideoSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+class VideoCRUDView(RetrieveUpdateDestroyAPIView):
+    queryset = Video.objects.all()
+    serializer_class = VideoSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+class DocumentCreateAndListView(ListCreateAPIView):
+    queryset = Document.objects.all()
+    serializer_class = DocumentSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    
+class DocumentCRUDView(RetrieveUpdateDestroyAPIView):
+    queryset = Document.objects.all()
+    serializer_class = DocumentSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
