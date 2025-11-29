@@ -20,7 +20,6 @@ from rest_framework.permissions import IsAdminUser
 
 from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 
@@ -139,51 +138,45 @@ class AdminUserViewSet(ModelViewSet):
     
     
 
-
-
 class AdminStaffViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
-    GenericViewSet
+    GenericViewSet      
+
 ):
     serializer_class = UserSerializer
-    authentication_classes = [JWTAuthentication]
-
     permission_classes = [IsAdminUser]
-
+    
     def get_queryset(self):
-        return Users.objects.filter(role="staff")
-
-    # 🔥 Fix for POST (create staff)
+        return Users.objects.filter(role = 'staff')
+    def get(self, request, *args, **kwargs):
+         return self.list(request, *args, **kwargs)
     def post(self, request, *args, **kwargs):
-        data = request.data.copy()
-        data["role"] = "staff"  # force staff role
-
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    # 🔥 Update already handled by DRF, no need custom put
-
+        request.data._mutable = True
+        request.data['role'] = 'staff'
+        return self.create(request, *args, **kwargs)
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+    
     @action(detail=True, methods=["post"], url_path="block")
     def block(self, request, pk=None):
         staff = self.get_object()
         staff.is_active = False
         staff.save()
-        return Response({"msg": "Staff blocked successfully"}, status=200)
+        return Response({"msg": "Staff blocked successfully"}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"], url_path="unblock")
     def unblock(self, request, pk=None):
         staff = self.get_object()
         staff.is_active = True
         staff.save()
-        return Response({"msg": "Staff unblocked successfully"}, status=200)
-         
+        return Response({"msg": "Staff unblocked successfully"}, status=status.HTTP_200_OK)
+            
 class AdminGetView(APIView):
     permission_classes = [IsAdminUser]
     def get(self, request, pk):
