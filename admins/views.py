@@ -20,6 +20,7 @@ from rest_framework.permissions import IsAdminUser
 
 from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 
@@ -149,6 +150,8 @@ class AdminStaffViewSet(
     GenericViewSet
 ):
     serializer_class = UserSerializer
+    authentication_classes = [JWTAuthentication]
+
     permission_classes = [IsAdminUser]
 
     def get_queryset(self):
