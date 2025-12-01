@@ -50,7 +50,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(max_length=100, unique=True)
     username = models.CharField(max_length=50, unique=True)
-    phone = models.CharField(max_length=15, unique=True, null=True, blank=True)
+    phone = models.CharField(max_length=10, unique=True, null=True, blank=True)
     image = models.ImageField(upload_to='profile_images/', null=True, blank=True)   
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
