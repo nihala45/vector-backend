@@ -1,4 +1,4 @@
-from rest_framework import permissions, status, mixins
+from rest_framework import permissions, status, mixins, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics
@@ -21,8 +21,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet
 
-
-
+    
 class AdminLoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
@@ -149,15 +148,32 @@ class AdminStaffViewSet(
 ):
     serializer_class = UserSerializer
     permission_classes = [IsAdminUser]
+    parser_classes = [MultiPartParser, FormParser]
+
+    
     
     def get_queryset(self):
         return Users.objects.filter(role = 'staff')
     def get(self, request, *args, **kwargs):
          return self.list(request, *args, **kwargs)
-    def post(self, request, *args, **kwargs):
-        request.data._mutable = True
-        request.data['role'] = 'staff'
-        return self.create(request, *args, **kwargs)
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data["role"] = "staff"
+        is_active_val = request.data.get("is_active")
+        if is_active_val is not None:
+            if str(is_active_val).lower() in ['true', '1', 'yes']:
+                data["is_active"] = True
+            elif str(is_active_val).lower() in ['false', '0', 'no']:
+                data["is_active"] = False
+        
+        serializer = self.get_serializer(data=data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except serializers.ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
     def delete(self, request, *args, **kwargs):

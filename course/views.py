@@ -5,13 +5,17 @@ from .models import Course, Module, Topic, Video, Document
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.permissions import IsAdminUser
+
 
 # Create your views here.
 class CreateCourseView(ListCreateAPIView):
+    permission_classes = [IsAdminUser]
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-class ProducCRUDView(RetrieveUpdateDestroyAPIView):
+class CourseCRUDView(RetrieveUpdateDestroyAPIView):
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]

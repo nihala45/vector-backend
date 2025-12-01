@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import Users
 
-
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -13,16 +12,26 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
+        
         groups = validated_data.pop("groups", None)
         permissions = validated_data.pop("user_permissions", None)
 
-        user = Users.objects.create_user(**validated_data)
+       
+        password = validated_data.pop("password", None)
 
         
-        if groups:
+        user = Users(**validated_data)
+
+        if password:
+            user.set_password(password)
+
+        user.save()
+
+        # Now assign many-to-many properly
+        if groups is not None:
             user.groups.set(groups)
 
-        if permissions:
+        if permissions is not None:
             user.user_permissions.set(permissions)
 
         return user

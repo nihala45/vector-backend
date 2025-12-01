@@ -4,12 +4,23 @@ from django.utils.text import slugify
 
 
 class Course(models.Model):
+    STATUS_CHOICES = (
+        ('draft', 'Draft'),
+        ('published', 'Published'),
+    )
     title = models.CharField(max_length=200, unique=True)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to='course_images/', null=True, blank=True)
     slug = models.SlugField(unique=True, blank=True)
-    active = models.BooleanField(default=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
+
+    staff = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        limit_choices_to={'role': 'staff'},
+        related_name='courses_assigned',
+        blank=True
+    )
 
     staff = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
