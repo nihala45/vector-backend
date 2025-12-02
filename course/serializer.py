@@ -3,56 +3,14 @@ from .models import Course, Module, Topic, Video, Document
 
 
 
-class CourseSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Course
-        fields = '__all__'
-        extra_kwargs = {
-            'created_at': {'read_only': True},
-            'slug': {'read_only': True},
-        }
-
-    def validate_title(self, value):
-        course_id = self.instance.id if self.instance else None
-        if Course.objects.exclude(id=course_id).filter(title=value).exists():
-            raise serializers.ValidationError("Course with this title already exists.")
-        return value
 
 
 
-class ModuleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Module
-        fields = '__all__'
-        extra_kwargs = {
-            'slug': {'read_only': True},
-        }
-
-    def validate_title(self, value):
-        module_id = self.instance.id if self.instance else None
-        course_id = self.initial_data.get("course")  # foreign key
-
-        if Module.objects.exclude(id=module_id).filter(course_id=course_id, title=value).exists():
-            raise serializers.ValidationError("A module with this title already exists in this course.")
-        return value
 
 
 
-class TopicSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Topic
-        fields = '__all__'
-        extra_kwargs = {
-            'slug': {'read_only': True},
-        }
 
-    def validate_title(self, value):
-        topic_id = self.instance.id if self.instance else None
-        module_id = self.initial_data.get("module")
 
-        if Topic.objects.exclude(id=topic_id).filter(module_id=module_id, title=value).exists():
-            raise serializers.ValidationError("A topic with this title already exists in this module.")
-        return value
 
 
 
@@ -84,3 +42,78 @@ class DocumentSerializer(serializers.ModelSerializer):
         if Document.objects.exclude(id=document_id).filter(topic_id=topic_id, title=value).exists():
             raise serializers.ValidationError("A document with this title already exists in this topic.")
         return value
+
+
+class TopicSerializer(serializers.ModelSerializer):
+    videos =  VideoSerializer(many=True, read_only=True)
+    documents =  DocumentSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Topic
+        fields = '__all__'
+        extra_kwargs = {
+            'slug': {'read_only': True},
+        }
+
+    def validate_title(self, value):
+        topic_id = self.instance.id if self.instance else None
+        module_id = self.initial_data.get("module")
+
+        if Topic.objects.exclude(id=topic_id).filter(module_id=module_id, title=value).exists():
+            raise serializers.ValidationError("A topic with this title already exists in this module.")
+        return value
+
+class ModuleSerializer(serializers.ModelSerializer):
+    topics = TopicSerializer(many=True, read_only=True)
+    class Meta:
+        model = Module
+        fields = '__all__'
+        extra_kwargs = {
+            'slug': {'read_only': True},
+        }
+
+    def validate_title(self, value):
+        module_id = self.instance.id if self.instance else None
+        course_id = self.initial_data.get("course")  
+
+        if Module.objects.exclude(id=module_id).filter(course_id=course_id, title=value).exists():
+            raise serializers.ValidationError("A module with this title already exists in this course.")
+        return value
+
+    
+    
+    
+    
+class CourseSerializer(serializers.ModelSerializer):
+    modules = ModuleSerializer(many=True, read_only=True)
+    staff = serializers.StringRelatedField(many=True, read_only=True)
+    image = serializers.SerializerMethodField()   # <-- ADD THIS
+
+    class Meta:
+        model = Course
+        fields = '__all__'
+        extra_kwargs = {
+            'created_at': {'read_only': True},
+            'slug': {'read_only': True},
+        }
+
+    def validate_title(self, value):
+        course_id = self.instance.id if self.instance else None
+        if Course.objects.exclude(id=course_id).filter(title=value).exists():
+            raise serializers.ValidationError("Course with this title already exists.")
+        return value
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        if obj.image and request:
+            return request.build_absolute_uri(obj.image.url)
+        return None
+
+
+
+
+
+
+
+
+

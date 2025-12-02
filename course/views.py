@@ -15,10 +15,22 @@ class CreateCourseView(ListCreateAPIView):
     serializer_class = CourseSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 class CourseCRUDView(RetrieveUpdateDestroyAPIView):
-    parser_classes = [MultiPartParser, FormParser, JSONParser]
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
+    
+
+class CourseDetailsGetBySlug(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, slug):
+        try:
+            course = Course.objects.get(slug=slug)
+        except Course.DoesNotExist:
+            return Response({"error": "Course not found"}, status=404)
+
+        serializer = CourseSerializer(course, context={"request": request})
+        return Response(serializer.data, status=200)
     
 class AddStaffToCourse(APIView):
     def post(self, request, course_id):
@@ -68,7 +80,6 @@ class RemoveStaffFromCourse(APIView):
             'course_id': course.id,
             'staff_removed': [staff.id for staff in staff_members]
             }, status=200)
-
 class ModuleCreateAndListView(ListCreateAPIView):
     queryset = Module.objects.all()
     serializer_class = ModuleSerializer
