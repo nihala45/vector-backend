@@ -15,7 +15,7 @@ class CustomUserManager(BaseUserManager):
             email=email,
             username=username,
             phone=phone,
-            role=role,               
+            role=role,
             email_otp=email_otp,
             **extra_fields
         )
@@ -37,7 +37,7 @@ class CustomUserManager(BaseUserManager):
             username=username,
             phone=phone,
             password=password,
-            role="admin",            
+            role="admin",
             **extra_fields
         )
 
@@ -50,18 +50,25 @@ class Users(AbstractBaseUser, PermissionsMixin):
     )
 
     email = models.EmailField(max_length=100, unique=True)
-    username = models.CharField(max_length=50, unique=True)
+    username = models.CharField(max_length=50)
+
+    # FIX: allow country code
     phone = models.CharField(max_length=10, unique=True, null=True, blank=True)
-    image = models.ImageField(upload_to='profile_images/', null=True, blank=True)   
+
+    image = models.ImageField(upload_to="profile_images/", null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+
     is_email_verified = models.BooleanField(default=False)
     email_otp = models.CharField(max_length=6, null=True, blank=True)
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
+
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="user")
+
     objects = CustomUserManager()
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
 
     def __str__(self):
         return self.email
